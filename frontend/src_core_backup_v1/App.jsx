@@ -9,7 +9,6 @@ import PracticeTests from './components/PracticeTests';
 import CatAiChatbot from './components/CatAiChatbot';
 
 import AnalyticsDashboard from './components/AnalyticsDashboard';
-import MockAnalysisEngine from './components/MockAnalysisEngine';
 import ErrorLog from './components/ErrorLog';
 
 import { fetchHealth } from './api/client';
@@ -50,7 +49,6 @@ export default function App() {
       case 'sectionals': return <SectionalMocks onStart={handleStartExam} />;
       case 'practice': return <PracticeTests onStart={handleStartExam} />;
       case 'analytics': return <AnalyticsDashboard onNavigate={setCurrentView} />;
-      case 'mock-analysis': return <MockAnalysisEngine />;
       case 'errors': return <ErrorLog />;
       case 'analysis': return <DailyAnalysis onBack={() => setCurrentView('dashboard')} />;
       case 'profile': return <div className="p-8 text-slate-400">Profile Module Loading...</div>;

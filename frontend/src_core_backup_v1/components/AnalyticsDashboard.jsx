@@ -124,38 +124,22 @@ export default function AnalyticsDashboard({ onNavigate }) {
             {/* 3. SECTOR ANALYSIS -> REMOVED AS PER REQUEST */}
 
 
-            {/* ACTION CENTER */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* 1. ERROR LOGS */}
-                <div
-                    onClick={() => onNavigate('errors')}
-                    className="w-full bg-gradient-to-r from-rose-900/20 to-slate-900 border border-rose-900/30 p-8 rounded-2xl flex justify-between items-center cursor-pointer group hover:border-rose-500/50 transition-all"
-                >
-                    <div className="flex items-center gap-6">
-                        <div className="p-4 bg-rose-500/10 rounded-full text-rose-500 group-hover:scale-110 transition-transform">
-                            <AlertTriangle size={32} />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-black text-white uppercase tracking-tight">Active Error Logs</h2>
-                            <p className="text-rose-200/60 font-mono mt-1 text-xs">12 Critical Mistakes Pending</p>
-                        </div>
+            {/* ERROR LOG SHORTCUT BANNER */}
+            <div
+                onClick={() => onNavigate('errors')}
+                className="w-full bg-gradient-to-r from-rose-900/20 to-slate-900 border border-rose-900/30 p-8 rounded-2xl flex justify-between items-center cursor-pointer group hover:border-rose-500/50 transition-all"
+            >
+                <div className="flex items-center gap-6">
+                    <div className="p-4 bg-rose-500/10 rounded-full text-rose-500 group-hover:scale-110 transition-transform">
+                        <AlertTriangle size={32} />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-black text-white uppercase tracking-tight">Active Error Logs</h2>
+                        <p className="text-rose-200/60 font-mono mt-1">12 Critical Mistakes in last session requires review.</p>
                     </div>
                 </div>
-
-                {/* 2. MOCK FORENSICS (NEW) */}
-                <div
-                    onClick={() => onNavigate('mock-analysis')}
-                    className="w-full bg-gradient-to-r from-indigo-900/20 to-slate-900 border border-indigo-900/30 p-8 rounded-2xl flex justify-between items-center cursor-pointer group hover:border-indigo-500/50 transition-all"
-                >
-                    <div className="flex items-center gap-6">
-                        <div className="p-4 bg-indigo-500/10 rounded-full text-indigo-500 group-hover:scale-110 transition-transform">
-                            <Activity size={32} />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-black text-white uppercase tracking-tight">Deep Forensics</h2>
-                            <p className="text-indigo-200/60 font-mono mt-1 text-xs">Analysis Across All Mocks</p>
-                        </div>
-                    </div>
+                <div className="px-6 py-3 bg-rose-600 text-white font-bold uppercase tracking-widest text-xs rounded-lg shadow-lg group-hover:bg-rose-500 transition-colors">
+                    Review Analysis
                 </div>
             </div>
 

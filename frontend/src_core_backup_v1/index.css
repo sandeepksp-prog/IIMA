@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+    --color-surface: #18181b;
+    --color-background: #09090b;
+    --color-border: #27272a;
+}
+
+/* Fallback / explicit utilities if @theme fails */
+.bg-surface {
+    background-color: #18181b;
+}
+
+.bg-background {
+    background-color: #09090b;
+}
+
+.border-border {
+    border-color: #27272a;
+}
+
+/* Global Reset */
+:root {
+    color-scheme: dark;
+}
+
+body {
+    background-color: #09090b;
+    color: #fafafa;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #18181b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
+}
+
+/* Custom Utility Classes */
+.neo-card {
+    background-color: #18181b;
+    /* fallback */
+    background-color: var(--color-surface, #18181b);
+    border: 2px solid #27272a;
+    box-shadow: 5px 5px 0px 0px #27272a;
+}
+
+.neo-btn {
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    transition-property: transform, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+    border: 2px solid #3f3f46;
+    box-shadow: 4px 4px 0px 0px #27272a;
+}
+
+.neo-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
+
+.neo-input {
+    background-color: #09090b;
+    border: 2px solid #27272a;
+    padding: 0.5rem;
+    outline: none;
+    transition: all 150ms;
+}
+
+.neo-input:focus {
+    border-color: #52525b;
+    box-shadow: 4px 4px 0px 0px #27272a;
+}
+
+/* Animations */
+@keyframes pulse-slow {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
