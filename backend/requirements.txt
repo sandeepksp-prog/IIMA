@@ -1,5 +1,12 @@
 fastapi
 uvicorn
-supabase
-python-dotenv
 pydantic
+python-dotenv
+supabase
+httpx
+groq
+huggingface_hub
+tavily-python
+duckduckgo-search
+psycopg2-binary
+websockets
