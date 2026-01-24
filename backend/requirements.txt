@@ -1,7 +1,5 @@
 fastapi
 uvicorn
+supabase
 python-dotenv
-langgraph
-langchain-core
-httpx
 pydantic

@@ -1,41 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
 import { Target, TrendingUp, AlertTriangle, Layers, Activity, Brain } from 'lucide-react';
 import { ANALYTICS_MASTER_DATA } from '../data/analyticsMasterData';
-import { useAnalytics } from '../hooks/useAnalytics';
 import TechTree from './TechTree';
 import SmartHeatmap from './SmartHeatmap';
 
 export default function AnalyticsDashboard({ onNavigate }) {
-    // 1. Hook Integration (The "Real Brain")
-    const { data: apiData, loading, usingMock } = useAnalytics();
-
-    // 2. Data Merging Strategy (Inch-to-Inch)
-    // We overlay the real API data on top of the Master structure where possible.
-    const kpiData = useMemo(() => {
-        if (!apiData || !apiData.global_kpis) return ANALYTICS_MASTER_DATA.overview.kpi;
-
-        // Map API Global KPIs to UI Card format
-        return [
-            {
-                label: 'Global Accuracy',
-                value: `${apiData.global_kpis.accuracy}%`,
-                sub: '+0.0%', // Delta logic can be added later
-                color: 'text-emerald-400',
-                icon: Target
-            },
-            {
-                label: 'Questions Solved',
-                value: apiData.global_kpis.total_attempts,
-                sub: 'Lifetime Volume',
-                color: 'text-zinc-400',
-                icon: Layers
-            },
-            // Keep the remaining static cards (Est. Percentile, Weakness) until we map them
-            ...ANALYTICS_MASTER_DATA.overview.kpi.slice(2)
-        ];
-    }, [apiData]);
-
     // Construct Global Tree from Sections for the "Main Screener"
     // SmartHeatmap expects an object { children: [...] } or array [...]
     const globalTree = {
@@ -73,13 +43,12 @@ export default function AnalyticsDashboard({ onNavigate }) {
                         Performance <span className="text-zinc-600">Nexus</span>
                     </h1>
                     <p className="text-zinc-500 mt-2 font-mono text-sm">
-                        Live Intelligence Stream • <span className={`text-emerald-500`}>v2.4.0 Online</span>
-                        {usingMock && <span className="ml-2 text-amber-500 text-xs">(OFFLINE MODE)</span>}
+                        Live Intelligence Stream • <span className="text-emerald-500">v2.4.0 Online</span>
                     </p>
                 </div>
                 {/* Global KPIs Row */}
                 <div className="flex gap-4">
-                    {kpiData.map((kpi, i) => (
+                    {ANALYTICS_MASTER_DATA.overview.kpi.map((kpi, i) => (
                         <div key={i} className="hidden lg:block">
                             <GlobalKpiCard icon={Target} {...kpi} />
                         </div>
@@ -154,33 +123,37 @@ export default function AnalyticsDashboard({ onNavigate }) {
                 </div>
             </section>
 
-            {/* ACTION CENTER - REFINED SLEEK */}
+            {/* ACTION CENTER */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 1. ERROR LOGS */}
                 <div
                     onClick={() => onNavigate('errors')}
-                    className="w-full bg-zinc-900 border-2 border-zinc-800 p-6 rounded-lg flex items-center gap-6 cursor-pointer group hover:border-rose-500 transition-all shadow-[4px_4px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0px_0px_#000]"
+                    className="w-full bg-zinc-900 border-2 border-zinc-800 p-8 rounded-lg flex justify-between items-center cursor-pointer group hover:border-rose-500 transition-all shadow-[6px_6px_0px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#000]"
                 >
-                    <div className="p-3 bg-zinc-950 rounded-full border-2 border-rose-500/50 text-rose-500 group-hover:scale-110 group-hover:border-rose-500 group-hover:bg-rose-500 group-hover:text-black transition-all">
-                        <AlertTriangle size={24} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-black text-white uppercase tracking-tight group-hover:text-rose-400 transition-colors">Active Error Logs</h2>
-                        <p className="text-zinc-500 font-mono text-xs">12 Critical Mistakes Pending</p>
+                    <div className="flex items-center gap-6">
+                        <div className="p-4 bg-rose-500 text-black rounded font-bold group-hover:scale-110 transition-transform border-2 border-rose-900">
+                            <AlertTriangle size={32} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-white uppercase tracking-tight">Active Error Logs</h2>
+                            <p className="text-zinc-500 font-mono mt-1 text-xs">12 Critical Mistakes Pending</p>
+                        </div>
                     </div>
                 </div>
 
                 {/* 2. MOCK FORENSICS */}
                 <div
                     onClick={() => onNavigate('mock-analysis')}
-                    className="w-full bg-zinc-900 border-2 border-zinc-800 p-6 rounded-lg flex items-center gap-6 cursor-pointer group hover:border-indigo-500 transition-all shadow-[4px_4px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0px_0px_#000]"
+                    className="w-full bg-zinc-900 border-2 border-zinc-800 p-8 rounded-lg flex justify-between items-center cursor-pointer group hover:border-indigo-500 transition-all shadow-[6px_6px_0px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#000]"
                 >
-                    <div className="p-3 bg-zinc-950 rounded-full border-2 border-indigo-500/50 text-indigo-500 group-hover:scale-110 group-hover:border-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                        <Activity size={24} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-black text-white uppercase tracking-tight group-hover:text-indigo-400 transition-colors">Deep Forensics</h2>
-                        <p className="text-zinc-500 font-mono text-xs">Analysis Across All Mocks</p>
+                    <div className="flex items-center gap-6">
+                        <div className="p-4 bg-indigo-500 text-white rounded font-bold group-hover:scale-110 transition-transform border-2 border-indigo-900">
+                            <Activity size={32} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-white uppercase tracking-tight">Deep Forensics</h2>
+                            <p className="text-zinc-500 font-mono mt-1 text-xs">Analysis Across All Mocks</p>
+                        </div>
                     </div>
                 </div>
             </div>

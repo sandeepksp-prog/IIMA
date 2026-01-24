@@ -120,7 +120,7 @@ export default function SmartHeatmap({ data, title = "Performance Heatmap" }) {
     const rootChildren = Array.isArray(data) ? data : (data.children || []);
 
     return (
-        <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col font-sans h-auto min-h-[420px]">
+        <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col font-sans h-[420px] mb-6">
             {/* Header Control Bar */}
             <div className="bg-slate-900/80 p-3 border-b border-slate-800 flex justify-between items-center px-6 flex-none backdrop-blur-md">
                 <div className="flex items-center gap-3">
@@ -155,8 +155,8 @@ export default function SmartHeatmap({ data, title = "Performance Heatmap" }) {
                 </div>
             </div>
 
-            {/* Content - Expanded Height, No Scroll */}
-            <div className="flex-1 p-2 bg-slate-950/50">
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-2 no-scrollbar bg-slate-950/50">
                 <div className="flex flex-wrap w-full align-top content-start p-1">
                     {rootChildren.map((child, i) => (
                         <HeatmapNode

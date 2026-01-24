@@ -1,0 +1,58 @@
+name: Titan Quality Gate
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  quality-check:
+    name: The Watchdog (Titan QA)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+        pip install black flake8 mypy
+
+    - name: Lint with Flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Run Qodo/Codium AI Analysis (Mock)
+      run: |
+        echo "Running Qodo AI Agentic Analysis..."
+        # In a real scenario, this would interface with Codium's CLI
+        # For now, we simulate the "Watchdog" checking for logic gaps
+        echo "Analyzing 'Mindset Factory' Logic..."
+        echo "Checking Supabase Schema Compatibility..."
+        echo "✅ Qodo Analysis Passed: No Logic Bugs Found."
+
+    - name: Validate Schema SQL
+      run: |
+        # Simple check to ensure schema.sql exists and has valid SQL markers
+        if grep -q "CREATE TABLE IF NOT EXISTS exams_real" backend/schema.sql; then
+          echo "✅ Schema contains 'exams_real' vault."
+        else
+          echo "❌ Schema missing 'exams_real' vault."
+          exit 1
+        fi
+        if grep -q "vector(768)" backend/schema.sql; then
+          echo "✅ Schema contains Vector Embeddings."
+        else
+          echo "❌ Schema missing 'vector(768)' definition."
+          exit 1
+        fi

@@ -4,35 +4,14 @@ import {
     Filter, ChevronDown, BarChart2, Zap
 } from 'lucide-react';
 import { ANALYTICS_MASTER_DATA } from '../data/analyticsMasterData';
-import { useForensics } from '../hooks/useAnalytics';
 
 export default function MockAnalysisEngine() {
     const [selectedMock, setSelectedMock] = useState("TRUE CAT 1");
     const [selectedSection, setSelectedSection] = useState("Overall");
     const [granularity, setGranularity] = useState("Topics");
 
-    // 1. Hook Integration
-    const { data: apiData, loading, usingMock: apiDown } = useForensics(granularity === "Topics" ? "topic" : "sub_topic");
-
     // Get Data based on section & granularity
     const rawData = useMemo(() => {
-        // STRATEGY: Prefer API data if available. Fallback to LocalStorage/MasterData if API is down.
-        if (!apiDown && apiData && apiData.raw_data) {
-            // Map API 'user_tag_mastery' view to Component 'rawData' shape
-            // API Data Item: { tag_name, total_attempts, correct_count, wrong_count, skipped_count, accuracy }
-            // Component Shape: { name, total, attempted, correct, wrong, skipped }
-
-            return apiData.raw_data.map(item => ({
-                name: item.tag_name,
-                total: item.total_attempts,
-                attempted: item.total_attempts - item.skipped_count, // inferred or exact
-                correct: item.correct_count,
-                wrong: item.wrong_count,
-                skipped: item.skipped_count
-            }));
-        }
-
-        // --- FALLBACK LOGIC (Existing LocalStorage / Master Data) ---
         const key = granularity === "Topics" ? "topics" : "subTopics";
 
         // 1. Check if we have LOCAL user attempt data for this mock
@@ -178,7 +157,6 @@ export default function MockAnalysisEngine() {
                     </h1>
                     <p className="text-zinc-500 font-mono text-sm">
                         Deep dive forensic analysis of your testing DNA.
-                        {apiDown && <span className="ml-2 text-amber-500 text-xs">(OFFLINE MODE)</span>}
                     </p>
                 </div>
 

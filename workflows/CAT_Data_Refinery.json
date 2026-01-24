@@ -1,0 +1,247 @@
+{
+    "name": "CAT_Data_Refinery",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "pollTimes": {
+                    "item": [
+                        {
+                            "mode": "everyMinute"
+                        }
+                    ]
+                },
+                "watchImpl": "polling"
+            },
+            "name": "Google Drive Trigger",
+            "type": "n8n-nodes-base.googleDriveTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "command": "unstructured-ingest {{ $json.webContentLink }}"
+            },
+            "name": "Step 1: Ingest (Unstructured)",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                450,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": "gemini-pro",
+                "prompt": "Analyze this text. Is it a Question or a Solution/Trick? Return JSON: { \"type\": \"QUESTION\" | \"SOLUTION\" }"
+            },
+            "name": "Step 2: Segregate (Router)",
+            "type": "n8n-nodes-base.googleGemini",
+            "typeVersion": 1,
+            "position": [
+                650,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.type }}",
+                            "value2": "QUESTION"
+                        }
+                    ]
+                }
+            },
+            "name": "If Question",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                850,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": "gemini-pro",
+                "prompt": "Analyze this question. Tell me the Setter's Intent. How did they hide the answer? What is the 'Tone'?"
+            },
+            "name": "Step 3: The Psychologist",
+            "type": "n8n-nodes-base.googleGemini",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "tableId": "mindset_vectors",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "trick_description",
+                            "fieldValue": "={{ $json.text }}"
+                        }
+                    ]
+                }
+            },
+            "name": "Save to Mindset Vault",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                1250,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": "gemini-pro",
+                "prompt": "Retrieve a 'Trick' from mindset_vectors. Apply it to the topic 'Algebra'. Generate 5 NEW questions."
+            },
+            "name": "Step 4: The Creator",
+            "type": "n8n-nodes-base.googleGemini",
+            "typeVersion": 1,
+            "position": [
+                1450,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": "mistral-large",
+                "prompt": "Solve these 5 questions. Check logic. If logic fails -> Delete. If passes -> Save."
+            },
+            "name": "Step 5: The Critic",
+            "type": "n8n-nodes-base.openAi",
+            "typeVersion": 1,
+            "position": [
+                1650,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "tableId": "questions_synthetic",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "content_json",
+                            "fieldValue": "={{ $json.text }}"
+                        }
+                    ]
+                }
+            },
+            "name": "Save Synthetic Qs",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                1850,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Google Drive Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Step 1: Ingest (Unstructured)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Step 1: Ingest (Unstructured)": {
+            "main": [
+                [
+                    {
+                        "node": "Step 2: Segregate (Router)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Step 2: Segregate (Router)": {
+            "main": [
+                [
+                    {
+                        "node": "If Question",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If Question": {
+            "main": [
+                [
+                    {
+                        "node": "Step 3: The Psychologist",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Step 3: The Psychologist": {
+            "main": [
+                [
+                    {
+                        "node": "Save to Mindset Vault",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save to Mindset Vault": {
+            "main": [
+                [
+                    {
+                        "node": "Step 4: The Creator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Step 4: The Creator": {
+            "main": [
+                [
+                    {
+                        "node": "Step 5: The Critic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Step 5: The Critic": {
+            "main": [
+                [
+                    {
+                        "node": "Save Synthetic Qs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
