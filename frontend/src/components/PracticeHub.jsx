@@ -19,14 +19,14 @@ const PRACTICE_SUMMARY = {
 };
 
 const StatCard = ({ icon: Icon, label, value, trend, color }) => (
-    <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center gap-4 hover:border-slate-700 transition-colors group">
-        <div className={`p-3 rounded-xl ${color.replace('text', 'bg')}/10 ${color} group-hover:scale-110 transition-transform`}>
+    <div className="bg-zinc-900 border-2 border-zinc-800 p-5 flex items-center gap-4 hover:border-zinc-600 transition-colors group shadow-[4px_4px_0px_0px_#27272a] hover:-translate-y-1">
+        <div className={`p-3 border-2 border-zinc-700 bg-zinc-950 ${color} group-hover:scale-110 transition-transform`}>
             <Icon size={24} />
         </div>
         <div>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">{label}</p>
-            <h4 className="text-2xl font-black text-white mt-0.5">{value}</h4>
-            {trend && <span className="text-[10px] font-mono text-green-400">{trend}</span>}
+            <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider">{label}</p>
+            <h4 className="text-3xl font-black text-white mt-1 leading-none">{value}</h4>
+            {trend && <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-1 border border-emerald-500/20 mt-1 inline-block">{trend}</span>}
         </div>
     </div>
 );
@@ -34,25 +34,28 @@ const StatCard = ({ icon: Icon, label, value, trend, color }) => (
 const DomainCard = ({ domain, onSelect }) => (
     <button
         onClick={() => onSelect(domain.id)}
-        className="relative bg-slate-900 border border-slate-800 p-6 rounded-2xl text-left hover:border-slate-600 hover:bg-slate-800/50 transition-all group overflow-hidden w-full"
+        className="relative bg-zinc-900 border-2 border-zinc-800 p-6 text-left hover:border-zinc-500 hover:bg-zinc-800 transition-all group overflow-hidden w-full shadow-[5px_5px_0px_0px_#27272a] active:translate-y-[2px] active:shadow-none"
     >
-        <div className={`absolute top-0 left-0 w-1.5 h-full ${domain.bg}`}></div>
-        <div className="flex justify-between items-start mb-4">
-            <div className={`p-2 rounded-lg ${domain.bg}/10 ${domain.color}`}>
+        {/* Progress Bar Top */}
+        <div className={`absolute top-0 left-0 h-1.5 w-full ${domain.bg} opacity-50`}></div>
+
+        <div className="flex justify-between items-start mb-4 mt-2">
+            <div className={`p-2 border-2 border-zinc-700 bg-zinc-950 ${domain.color}`}>
                 <Activity size={20} />
             </div>
-            <span className="text-slate-500 text-xs font-mono">{domain.count} Tests Taken</span>
+            <span className="text-zinc-500 text-xs font-mono font-bold bg-zinc-950 px-2 py-1 border border-zinc-800">{domain.count} TESTS</span>
         </div>
-        <h3 className="text-xl font-black text-white uppercase tracking-tight mb-1">{domain.name}</h3>
-        <p className="text-slate-400 text-sm mb-6">{domain.fullName}</p>
+
+        <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-1 group-hover:text-emerald-400 transition-colors">{domain.name}</h3>
+        <p className="text-zinc-500 text-sm mb-6 font-mono border-b border-zinc-800 pb-4">{domain.fullName}</p>
 
         <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
-                <span className="text-[10px] text-slate-500 uppercase font-bold">Avg. Score</span>
-                <span className={`text-lg font-bold ${domain.color}`}>{domain.avg}%</span>
+                <span className="text-[10px] text-zinc-600 uppercase font-black">Avg. Score</span>
+                <span className={`text-xl font-bold ${domain.color}`}>{domain.avg}%</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
-                <ChevronRight size={16} className="text-slate-300" />
+            <div className="w-10 h-10 border-2 border-zinc-700 bg-zinc-950 flex items-center justify-center group-hover:bg-zinc-800 group-hover:border-zinc-500 transition-colors">
+                <ChevronRight size={20} className="text-zinc-400 group-hover:text-white" />
             </div>
         </div>
     </button>
@@ -64,33 +67,33 @@ export default function PracticeHub({ onNavigate }) {
     // We'll use the onNavigate prop passed from App/Dashboard to switch views.
 
     return (
-        <div className="p-8 pb-32 space-y-12 bg-slate-950 min-h-screen text-slate-50 font-sans animate-in fade-in duration-500">
+        <div className="p-8 pb-32 space-y-12 bg-zinc-950 min-h-screen text-zinc-50 font-sans animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex justify-between items-end border-b border-slate-800 pb-6">
+            <div className="flex justify-between items-end border-b-2 border-zinc-800 pb-6">
                 <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-900/30 text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-3 border border-indigo-800/50">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-800 border_2 border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-3 shadow-[2px_2px_0px_0px_#000]">
                         <BookOpen size={12} /> Practice Headquarters
                     </div>
-                    <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-100">
-                        Training <span className="text-indigo-500">Summary</span>
+                    <h1 className="text-4xl font-black uppercase tracking-tighter text-zinc-100">
+                        Training <span className="text-emerald-500 underline decoration-4 decoration-zinc-800 underline-offset-4">Summary</span>
                     </h1>
-                    <p className="text-slate-500 mt-2 max-w-xl">
-                        Review your overall training volume and select a domain to dive deeper.
+                    <p className="text-zinc-500 mt-2 max-w-xl font-mono text-sm leading-relaxed">
+                        > Review your overall training volume and select a domain to dive deeper.
                     </p>
                 </div>
             </div>
 
             {/* High Level Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard icon={Target} label="Total Tests" value={PRACTICE_SUMMARY.totalTests} color="text-blue-400" />
+                <StatCard icon={Target} label="Total Tests" value={PRACTICE_SUMMARY.totalTests} color="text-zinc-100" />
                 <StatCard icon={TrendingUp} label="Avg. Score" value={PRACTICE_SUMMARY.avgScore} trend="+5.2 vs last week" color="text-emerald-400" />
-                <StatCard icon={Award} label="Avg. Percentile" value={PRACTICE_SUMMARY.avgPercentile} color="text-purple-400" />
-                <StatCard icon={Clock} label="Study Time" value="48h 20m" color="text-amber-400" />
+                <StatCard icon={Award} label="Avg. Percentile" value={PRACTICE_SUMMARY.avgPercentile} color="text-zinc-100" />
+                <StatCard icon={Clock} label="Study Time" value="48h 20m" color="text-zinc-100" />
             </div>
 
             {/* Domain Selection */}
             <div>
-                <h3 className="text-lg font-bold text-slate-300 mb-6 flex items-center gap-2 uppercase tracking-wider">
+                <h3 className="text-lg font-bold text-zinc-200 mb-6 flex items-center gap-2 uppercase tracking-wider">
                     <BarChart3 size={18} className="text-indigo-500" /> Select Domain
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -105,26 +108,26 @@ export default function PracticeHub({ onNavigate }) {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-                <div className="p-4 border-b border-slate-800 bg-slate-800/50 flex justify-between items-center">
-                    <h3 className="font-bold text-slate-300 text-sm uppercase tracking-wider">Recent Activity</h3>
-                    <button className="text-[10px] font-bold uppercase text-indigo-400 hover:text-indigo-300">View All History</button>
+            <div className="bg-zinc-900 border-2 border-zinc-800 overflow-hidden shadow-[5px_5px_0px_0px_#27272a]">
+                <div className="p-4 border-b-2 border-zinc-800 bg-zinc-950 flex justify-between items-center">
+                    <h3 className="font-bold text-zinc-400 text-sm uppercase tracking-wider">Recent Activity</h3>
+                    <button className="text-[10px] font-bold uppercase text-indigo-400 hover:text-indigo-300 hover:underline">View All History</button>
                 </div>
-                <div className="divide-y divide-slate-800/50">
+                <div className="divide-y-2 divide-zinc-800">
                     {PRACTICE_SUMMARY.recent.map(test => (
-                        <div key={test.id} className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
+                        <div key={test.id} className="p-4 flex items-center justify-between hover:bg-zinc-800 transition-colors group">
                             <div className="flex items-center gap-4">
-                                <div className={`p-2 rounded-lg ${test.score >= 80 ? 'bg-emerald-900/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
+                                <div className={`p-2 border-2 ${test.score >= 80 ? 'bg-emerald-500 text-black border-emerald-600' : 'bg-zinc-900 border-zinc-700 text-zinc-500'}`}>
                                     {test.score >= 80 ? <Award size={18} /> : <Activity size={18} />}
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-slate-200 text-sm">{test.name}</h4>
-                                    <p className="text-[11px] text-slate-500 font-mono">{test.type} • {test.date}</p>
+                                    <h4 className="font-bold text-zinc-200 text-sm group-hover:text-white">{test.name}</h4>
+                                    <p className="text-[11px] text-zinc-500 font-mono uppercase">{test.type} • {test.date}</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <div className="font-black text-slate-200">{test.score}</div>
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">Score</div>
+                                <div className="font-black text-zinc-200 text-lg">{test.score}</div>
+                                <div className="text-[10px] text-zinc-600 uppercase font-bold">Score</div>
                             </div>
                         </div>
                     ))}

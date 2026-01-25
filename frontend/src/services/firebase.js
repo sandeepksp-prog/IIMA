@@ -15,8 +15,17 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+let app, db;
+
+try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    console.log("Firebase initialized successfully");
+} catch (error) {
+    console.error("Firebase init failed:", error);
+    db = { type: 'mock', collection: () => ({}) };
+}
+
 // const analytics = getAnalytics(app); 
 
 export { db, collection, getDocs, doc, getDoc };

@@ -173,7 +173,7 @@ export default function Dashboard({ onStartMock, onOpenDailyInsights }) {
                                 Score Trajectory
                                 <span className="text-xs font-mono text-emerald-400">+12% vs last month</span>
                             </h3>
-                            <div className="h-64 w-full">
+                            <div className="h-64 w-full min-h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={performanceData}>
                                         <XAxis dataKey="name" stroke="#52525b" fontSize={12} tickLine={false} axisLine={false} />
