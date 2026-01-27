@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Home, BookOpen, BarChart2, AlertCircle, Layout, Settings, LogOut, Terminal, Brain, User, Target } from 'lucide-react';
+import { Home, BookOpen, BarChart2, AlertCircle, Layout, Settings, LogOut, Terminal, Brain, User, Target, Zap } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import MockList from './components/MockList';
 import ExamInterface from './components/ExamInterface';
 import DailyAnalysis from './components/DailyAnalysis';
+import DailyTargets from './components/DailyTargets';
 import SectionalMocks from './components/SectionalMocks';
 import PracticeTests from './components/PracticeTests';
 import CatAiChatbot from './components/CatAiChatbot';
@@ -48,6 +49,7 @@ export default function App() {
       case 'dashboard': return <Dashboard onNavigate={setCurrentView} onStartMock={handleStartExam} onOpenDailyInsights={() => setCurrentView('analysis')} />;
       case 'mocks': return <MockList onStart={handleStartExam} />;
       case 'sectionals': return <SectionalMocks onStart={handleStartExam} />;
+      case 'daily-targets': return <DailyTargets />;
       case 'practice': return <PracticeTests onStart={handleStartExam} />;
       case 'analytics': return <AnalyticsDashboard onNavigate={setCurrentView} />;
       case 'mock-analysis': return <MockAnalysisEngine />;
@@ -79,9 +81,10 @@ export default function App() {
 
         <nav className="flex-1 p-4 space-y-2">
           <SidebarItem icon={Home} label="War Room" active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} />
+          <SidebarItem icon={Target} label="Daily Targets" active={currentView === 'daily-targets'} onClick={() => setCurrentView('daily-targets')} />
           <SidebarItem icon={Terminal} label="Full Mocks" active={currentView === 'mocks'} onClick={() => setCurrentView('mocks')} />
           <SidebarItem icon={BookOpen} label="Sectionals" active={currentView === 'sectionals'} onClick={() => setCurrentView('sectionals')} />
-          <SidebarItem icon={Target} label="Practice Tests" active={currentView === 'practice'} onClick={() => setCurrentView('practice')} />
+          <SidebarItem icon={Zap} label="Practice Tests" active={currentView === 'practice'} onClick={() => setCurrentView('practice')} />
           <SidebarItem icon={BarChart2} label="Analytics" active={currentView === 'analytics'} onClick={() => setCurrentView('analytics')} />
           <SidebarItem icon={AlertCircle} label="Error Log" active={currentView === 'errors'} onClick={() => setCurrentView('errors')} />
 

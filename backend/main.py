@@ -1,30 +1,48 @@
-from fastapi import FastAPI
+import os
+import firebase_admin
+from firebase_admin import credentials, firestore
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from routers import analytics
 
-app = FastAPI(title="Cat Agentic Engine API", version="1.0.0")
+# 1. Initialize Firebase Admin
+cred_path = os.path.join(os.path.dirname(__file__), "service_account_key.json")
+if os.path.exists(cred_path):
+    cred = credentials.Certificate(cred_path)
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    print("✅ Firebase Admin Initialized (Backend)")
+else:
+    print("⚠️ WARNING: service_account_key.json not found. Database features will fail.")
+    db = None
 
-# CORS Configuration
-origins = [
-    "http://localhost:5173",  # Frontend Dev Server
-    "http://localhost:3000",
-]
+# 2. Setup FastAPI
+app = FastAPI(title="CAT Agentic Brain")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include Routers
-app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
-
+# 3. Routes
 @app.get("/health")
-def health_check():
-    return {"status": "healthy", "service": "cat-agentic-engine-backend"}
+async def health_check():
+    return {"status": "Brain Online", "database": "Connected" if db else "Disconnected"}
+
+class Query(BaseModel):
+    query: str
+
+@app.post("/api/generate")
+async def generate_response(q: Query):
+    # Placeholder for Agentic Logic
+    return {
+        "response": f"Agent Received: {q.query}. Logic Core not yet fully linked.",
+        "metadata": {"source": "Titan Backend"}
+    }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

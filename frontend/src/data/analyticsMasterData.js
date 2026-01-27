@@ -209,3 +209,6 @@ export const ANALYTICS_MASTER_DATA = {
         }
     }
 };
+
+export const analyticsMasterData = ANALYTICS_MASTER_DATA;
+export default ANALYTICS_MASTER_DATA;
