@@ -89,7 +89,35 @@ export default function ExamInterface({ examData, onExit }) {
 
             console.log("Generating Fresh Questions for:", examData.title);
             let generatedQs = [];
-            if (examData.type === 'Sectional' || examData.subject) {
+
+            if (examData.mode === 'repository-test') {
+                // REPOSITORY TEST (Topic Specific)
+                console.log("Repo Test Mode:", examData.topic);
+                const count = examData.questions || 10;
+                generatedQs = Array.from({ length: count }, (_, i) => ({
+                    id: `repo-${examData.subject}-${i}`,
+                    section: examData.subject || 'General',
+                    topic: examData.topic || 'General', // Store topic for logic
+                    question_text: `[${examData.subject} - ${examData.topic}] Question ${i + 1}: This is a specialized drill question for ${examData.topic}.`,
+                    options: { A: "Option 1", B: "Option 2", C: "Option 3", D: "Option 4" },
+                    correct_option: "A"
+                }));
+                const duration = examData.duration || 20 * 60;
+                setTimeLeft(duration);
+
+            } else if (examData.mode === 'daily-target') {
+                // DAILY TARGET MODE: 15 Questions (5 VARC, 5 DILR, 5 QA)
+                // This matches the config passed from DailyTargets.jsx
+                const varcQs = Array.from({ length: 5 }, (_, i) => ({ id: `dt-varc-${i}`, section: 'VARC', type: 'RC', question_text: `[VARC] Daily Target Q${i + 1}: Reading Comprehension Passag...` }));
+                const dilrQs = Array.from({ length: 5 }, (_, i) => ({ id: `dt-dilr-${i}`, section: 'DILR', type: 'SET', question_text: `[DILR] Daily Target Q${i + 1}: Data Set Analysis...` }));
+                const qaQs = Array.from({ length: 5 }, (_, i) => ({ id: `dt-qa-${i}`, section: 'QA', type: 'MCQ', question_text: `[QA] Daily Target Q${i + 1}: Quantitative Problem...` }));
+                generatedQs = [...varcQs, ...dilrQs, ...qaQs];
+
+                // Calculate total duration from sections if available, else 40 mins
+                const totalDuration = examData.sections ? examData.sections.reduce((acc, sec) => acc + sec.duration, 0) : 40 * 60;
+                setTimeLeft(totalDuration); // Global Timer for Daily Target (allows switching)
+
+            } else if (examData.type === 'Sectional' || examData.subject) {
                 const subject = examData.subject || 'VARC';
                 const count = examData.questions || 22;
                 generatedQs = Array.from({ length: count }, (_, i) => ({
@@ -99,16 +127,17 @@ export default function ExamInterface({ examData, onExit }) {
                     options: { A: "Option 1", B: "Option 2", C: "Option 3", D: "Option 4" },
                     correct_option: "A"
                 }));
+                setTimeLeft((examData.duration || 60) * 60);
             } else {
                 const varcQs = Array.from({ length: 24 }, (_, i) => ({ id: `varc-${i}`, section: 'VARC', type: 'RC', question_text: `[VARC] Q${i + 1} Placeholder` }));
                 const dilrQs = Array.from({ length: 22 }, (_, i) => ({ id: `dilr-${i}`, section: 'DILR', type: 'SET', question_text: `[DILR] Q${i + 1} Placeholder` }));
                 const qaQs = Array.from({ length: 22 }, (_, i) => ({ id: `qa-${i}`, section: 'QA', type: 'MCQ', question_text: `[QA] Q${i + 1} Placeholder` }));
                 generatedQs = [...varcQs, ...dilrQs, ...qaQs];
+                setTimeLeft((examData.duration || 60) * 60);
             }
 
             setQuestions(generatedQs);
             setQStatus(Array(generatedQs.length).fill(STATUS.NOT_VISITED));
-            setTimeLeft((examData.duration || 60) * 60);
             setLoading(false);
         };
 
@@ -393,9 +422,24 @@ export default function ExamInterface({ examData, onExit }) {
                     <div className="p-4 border-t-2 border-zinc-800 bg-zinc-950">
                         <h4 className="text-xs text-zinc-500 font-bold mb-2 uppercase">Sections</h4>
                         <div className="flex gap-2">
-                            <button className="flex-1 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 border-b-2 border-emerald-500">VARC</button>
-                            <button className="flex-1 py-2 bg-zinc-900 text-zinc-500 text-xs font-bold hover:bg-zinc-800">DILR</button>
-                            <button className="flex-1 py-2 bg-zinc-900 text-zinc-500 text-xs font-bold hover:bg-zinc-800">QA</button>
+                            {['VARC', 'DILR', 'QA'].map(sec => {
+                                // Calculate start index for this section
+                                const startIndex = questions.findIndex(q => q.section === sec);
+                                const isActive = questions[currentQIndex]?.section === sec;
+                                return (
+                                    <button
+                                        key={sec}
+                                        onClick={() => {
+                                            if (startIndex !== -1) setCurrentQIndex(startIndex);
+                                        }}
+                                        className={`flex-1 py-2 text-xs font-bold border-b-2 hover:bg-zinc-800 transition-colors
+                                            ${isActive ? 'bg-zinc-800 text-emerald-400 border-emerald-500' : 'bg-zinc-900 text-zinc-500 border-transparent'}
+                                        `}
+                                    >
+                                        {sec}
+                                    </button>
+                                )
+                            })}
                         </div>
                     </div>
 

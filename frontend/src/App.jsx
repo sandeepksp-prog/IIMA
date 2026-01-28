@@ -19,6 +19,7 @@ import useActivityDetection from './hooks/useActivityDetection';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('dashboard');
+  const [viewParams, setViewParams] = useState(null); // Storage for navigation params (e.g. { subject: 'VARC' })
   const [activeExam, setActiveExam] = useState(null);
 
   // Dynamic Presence System
@@ -35,6 +36,12 @@ export default function App() {
     setCurrentView('dashboard');
   };
 
+  // NAVIGATION HANDLER (Supports Deep Linking)
+  const handleNavigate = (view, params = null) => {
+    setCurrentView(view);
+    setViewParams(params);
+  };
+
   // FULL SCREEN EXAM MODE (TCS iON Style)
   if (activeExam && currentView === 'exam') {
     return (
@@ -46,18 +53,18 @@ export default function App() {
 
   const renderContent = () => {
     switch (currentView) {
-      case 'dashboard': return <Dashboard onNavigate={setCurrentView} onStartMock={handleStartExam} onOpenDailyInsights={() => setCurrentView('analysis')} />;
+      case 'dashboard': return <Dashboard onNavigate={handleNavigate} onStartMock={handleStartExam} onOpenDailyInsights={() => handleNavigate('analysis')} />;
       case 'mocks': return <MockList onStart={handleStartExam} />;
-      case 'sectionals': return <SectionalMocks onStart={handleStartExam} />;
-      case 'daily-targets': return <DailyTargets />;
+      case 'sectionals': return <SectionalMocks onStart={handleStartExam} initialSubject={viewParams} />;
+      case 'daily-targets': return <DailyTargets onStart={handleStartExam} />;
       case 'practice': return <PracticeTests onStart={handleStartExam} />;
-      case 'analytics': return <AnalyticsDashboard onNavigate={setCurrentView} />;
+      case 'analytics': return <AnalyticsDashboard onNavigate={handleNavigate} />;
       case 'mock-analysis': return <MockAnalysisEngine />;
       case 'errors': return <ErrorLog />;
-      case 'analysis': return <DailyAnalysis onBack={() => setCurrentView('dashboard')} />;
+      case 'analysis': return <DailyAnalysis onBack={() => handleNavigate('dashboard')} />;
       case 'profile': return <div className="p-8 text-slate-400">Profile Module Loading...</div>;
       case 'settings': return <div className="p-8 text-slate-400">System Configuration Loading...</div>;
-      default: return <Dashboard onNavigate={setCurrentView} />;
+      default: return <Dashboard onNavigate={handleNavigate} />;
     }
   };
 

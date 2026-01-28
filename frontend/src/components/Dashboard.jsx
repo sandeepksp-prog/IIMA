@@ -31,7 +31,7 @@ const contributionData = Array.from({ length: 52 }, (_, i) => ({
     days: Array.from({ length: 7 }, () => Math.floor(Math.random() * 5))
 }));
 
-export default function Dashboard({ onStartMock, onOpenDailyInsights }) {
+export default function Dashboard({ onStartMock, onOpenDailyInsights, onNavigate }) {
     const [analyticsType, setAnalyticsType] = useState('full'); // 'full' | 'sectional'
 
     return (
@@ -125,11 +125,10 @@ export default function Dashboard({ onStartMock, onOpenDailyInsights }) {
 
                     {/* Widget 5: Quick Links */}
                     <div className="md:col-span-1 bg-zinc-900 border-2 border-zinc-800 shadow-[5px_5px_0px_0px_#27272a] p-4 flex flex-col gap-2 justify-center">
-                        <QuickLinkButton label="VARC Sectional" color="text-emerald-400" />
-                        <QuickLinkButton label="DILR Sectional" color="text-yellow-400" />
-                        <QuickLinkButton label="QA Sectional" color="text-indigo-400" />
+                        <QuickLinkButton label="VARC Sectional" color="text-emerald-400" onClick={() => onNavigate('sectionals', 'VARC')} />
+                        <QuickLinkButton label="DILR Sectional" color="text-yellow-400" onClick={() => onNavigate('sectionals', 'DILR')} />
+                        <QuickLinkButton label="QA Sectional" color="text-indigo-400" onClick={() => onNavigate('sectionals', 'QA')} />
                     </div>
-
                 </div>
             </section>
 
@@ -224,9 +223,16 @@ export default function Dashboard({ onStartMock, onOpenDailyInsights }) {
                             title="VARC"
                             color="emerald"
                             data={[
-                                { label: "RC Inference", score: 85 },
+                                { label: "RC: Main Idea", score: 85 },
+                                { label: "RC: Inference", score: 42 },
+                                { label: "RC: Fact Based", score: 90 },
+                                { label: "RC: Tone/Title", score: 65 },
                                 { label: "Parajumbles", score: 60 },
-                                { label: "Summary", score: 92 },
+                                { label: "Para Summary", score: 92 },
+                                { label: "Odd One Out", score: 78 },
+                                { label: "Para Completion", score: 55 },
+                                { label: "Critical Reasoning", score: 70 },
+                                { label: "Vocabulary", score: 88 }
                             ]}
                         />
 
@@ -235,9 +241,16 @@ export default function Dashboard({ onStartMock, onOpenDailyInsights }) {
                             title="DILR"
                             color="yellow"
                             data={[
-                                { label: "Arrangements", score: 70 },
-                                { label: "Games", score: 45 },
-                                { label: "Charts", score: 88 },
+                                { label: "Arrangements (Linear)", score: 70 },
+                                { label: "Arrangements (Circular)", score: 65 },
+                                { label: "Games & Tournaments", score: 45 },
+                                { label: "Quant Based Reasoning", score: 88 },
+                                { label: "Venn Diagrams", score: 92 },
+                                { label: "Bar & Line Charts", score: 75 },
+                                { label: "Pie Charts", score: 80 },
+                                { label: "Networks & Routes", score: 50 },
+                                { label: "Cubes & Dice", score: 95 },
+                                { label: "Caselets", score: 60 }
                             ]}
                         />
 
@@ -246,9 +259,18 @@ export default function Dashboard({ onStartMock, onOpenDailyInsights }) {
                             title="QA"
                             color="indigo"
                             data={[
-                                { label: "Algebra", score: 42 },
-                                { label: "Arithmetic", score: 78 },
-                                { label: "Geometry", score: 65 },
+                                { label: "Arithmetic: % & P/L", score: 78 },
+                                { label: "Arithmetic: TSD & Work", score: 82 },
+                                { label: "Algebra: Equations", score: 42 },
+                                { label: "Algebra: Inequalities", score: 55 },
+                                { label: "Algebra: Functions", score: 60 },
+                                { label: "Geometry: Triangles", score: 65 },
+                                { label: "Geometry: Circles", score: 70 },
+                                { label: "Geometry: Mensuration", score: 45 },
+                                { label: "NumSys: Factors/Div", score: 88 },
+                                { label: "NumSys: Remainders", score: 90 },
+                                { label: "ModMath: P&C", score: 35 },
+                                { label: "ModMath: Probability", score: 40 }
                             ]}
                         />
                     </div>
@@ -312,9 +334,9 @@ function StatCard({ label, value, icon: Icon, diff, good }) {
     );
 }
 
-function QuickLinkButton({ label, color }) {
+function QuickLinkButton({ label, color, onClick }) {
     return (
-        <button className="flex items-center justify-between w-full p-2 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-colors group">
+        <button onClick={onClick} className="flex items-center justify-between w-full p-2 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-colors group">
             <span className={`text-sm font-bold ${color}`}>{label}</span>
             <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-white" />
         </button>

@@ -7,29 +7,27 @@ import {
 import { db, collection, getDocs } from '../services/firebase';
 
 export default function MockList({ onStart }) {
-    const [mocks, setMocks] = useState([]);
+    const [mockList, setMockList] = useState([]); // Stores current visible list
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('All'); // All, Live, Attempted
+    const [activeTab, setActiveTab] = useState('TRUE_CATS'); // 'TRUE_CATS' or 'PREVIOUS_YEARS'
+    const [filter, setFilter] = useState('All');
 
-    // GENERATE 20 TRUE CAT MOCKS (Static Data for Instant Load)
-    const generateMocks = () => {
+    // GENERATE 20 TRUE CAT MOCKS (Static Data)
+    const generateTrueCats = () => {
         return Array.from({ length: 20 }, (_, i) => {
             const id = i + 1;
-            const isFree = id === 1; // Only TRUE CAT 1 is free
+            const isFree = id === 1;
             const status = id === 1 ? 'Live' : (id < 4 ? 'Attempted' : 'Upcoming');
-
-            // Randomize difficulty slightly
             const difficulties = ['Moderate', 'Hard', 'Catastrophic'];
-            const difficulty = difficulties[i % 3];
 
             return {
-                id: id,
+                id: `tc-${id}`,
                 title: `TRUE CAT ${id} ${isFree ? '(Free)' : ''}`,
-                type: "Full Length",
+                type: "True CAT",
                 status: status,
-                questions: 68, // NEW CAT PATTERN: 24 (VARC) + 22 (DILR) + 22 (QA)
+                questions: 66,
                 duration: 120,
-                difficulty: difficulty,
+                difficulty: difficulties[i % 3],
                 participants: 1000 + (id * 120),
                 endsIn: status === 'Live' ? "2 Days" : null,
                 unlocksIn: status === 'Upcoming' ? `${(id - 3) * 2} Days` : null,
@@ -41,42 +39,107 @@ export default function MockList({ onStart }) {
         });
     };
 
+    // GENERATE PREVIOUS YEAR PAPERS (2020-2023)
+    const generatePreviousYears = () => {
+        const years = [2023, 2022, 2021, 2020];
+        const slots = [1, 2, 3];
+        let papers = [];
+
+        years.forEach(year => {
+            slots.forEach(slot => {
+                papers.push({
+                    id: `py-${year}-${slot}`,
+                    title: `CAT ${year} - Slot ${slot}`,
+                    type: "Previous Year",
+                    status: "Unlocked", // All PY papers unlocked for now
+                    questions: 66,
+                    duration: 120,
+                    difficulty: "Actual CAT",
+                    participants: 5000 + (year * 100) + (slot * 50),
+                    isFree: true,
+                    attempted: false,
+                    year: year
+                });
+            });
+        });
+        return papers;
+    };
+
+    // DATA LOADING EFFECT
     React.useEffect(() => {
-        // Simulate a very short loading for UX, then load static data
+        setLoading(true);
         setTimeout(() => {
-            setMocks(generateMocks());
+            if (activeTab === 'TRUE_CATS') {
+                const data = generateTrueCats();
+                if (filter === 'All') setMockList(data);
+                else if (filter === 'Live') setMockList(data.filter(m => m.status === 'Live'));
+                else if (filter === 'Attempted') setMockList(data.filter(m => m.status === 'Attempted'));
+            } else {
+                // Previous Years - Filter by Year logic if needed, or just show all
+                const data = generatePreviousYears();
+                if (filter === 'All') setMockList(data);
+                else setMockList(data.filter(m => m.year.toString() === filter));
+            }
             setLoading(false);
-        }, 800);
-    }, []);
+        }, 600);
+    }, [activeTab, filter]);
 
-    const displayMocks = loading ? [] : (mocks && mocks.length > 0 ? mocks : FALLBACK_DATA);
-
+    // Available Filters Calculation
+    const getFilters = () => {
+        if (activeTab === 'TRUE_CATS') return ['All', 'Live', 'Attempted'];
+        return ['All', '2023', '2022', '2021', '2020'];
+    };
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
 
-            {/* HEADER & FILTERS */}
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b-2 border-zinc-800 pb-6">
-                <div>
-                    <h2 className="text-3xl font-black text-white flex items-center gap-3">
-                        <span className="bg-emerald-500 text-black px-2 text-2xl shadow-[4px_4px_0px_0px_#27272a]">MOCKS</span>
-                        WAR ROOM
-                    </h2>
-                    <p className="text-zinc-400 mt-2 font-mono text-sm">Select your battleground. Survive the heat.</p>
+            {/* HEADER & TABS */}
+            <div className="flex flex-col gap-6 border-b-2 border-zinc-800 pb-6">
+                <div className="flex flex-col md:flex-row justify-between items-end gap-4">
+                    <div>
+                        <h2 className="text-3xl font-black text-white flex items-center gap-3">
+                            <span className="bg-emerald-500 text-black px-2 text-2xl shadow-[4px_4px_0px_0px_#27272a]">MOCKS</span>
+                            WAR ROOM
+                        </h2>
+                        <p className="text-zinc-400 mt-2 font-mono text-sm leading-relaxed max-w-xl">
+                            Select your battleground. "True CATs" are predicted mocks for 2025. "Previous Years" are actual historical papers.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex gap-2">
-                    {['All', 'Live', 'Attempted'].map(f => (
+                {/* MAIN TABS */}
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => { setActiveTab('TRUE_CATS'); setFilter('All'); }}
+                        className={`px-6 py-3 font-black uppercase tracking-wider text-sm border-b-4 transition-all
+                            ${activeTab === 'TRUE_CATS' ? 'border-emerald-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}
+                        `}
+                    >
+                        True CAT Mocks
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('PREVIOUS_YEARS'); setFilter('All'); }}
+                        className={`px-6 py-3 font-black uppercase tracking-wider text-sm border-b-4 transition-all
+                            ${activeTab === 'PREVIOUS_YEARS' ? 'border-amber-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}
+                        `}
+                    >
+                        Previous Year Papers
+                    </button>
+                </div>
+
+                {/* SUB-FILTERS */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                    {getFilters().map(f => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`
-                 font-bold px-4 py-2 border-2 transition-all uppercase text-sm
-                 ${filter === f
-                                    ? 'bg-white text-black border-white shadow-[4px_4px_0px_0px_#27272a]'
+                                font-bold px-4 py-2 border-2 transition-all uppercase text-xs whitespace-nowrap
+                                ${filter === f
+                                    ? 'bg-white text-black border-white shadow-[3px_3px_0px_0px_#27272a]'
                                     : 'bg-zinc-900 text-zinc-500 border-zinc-700 hover:border-zinc-500 hover:text-white'
                                 }
-               `}
+                            `}
                         >
                             {f}
                         </button>
@@ -85,14 +148,14 @@ export default function MockList({ onStart }) {
             </div>
 
             {/* MOCK GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
                 {loading ? (
                     <div className="col-span-3 text-center py-20">
                         <div className="animate-spin w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
                         <p className="text-zinc-500 font-mono">Loading Operations...</p>
                     </div>
                 ) : (
-                    displayMocks.map((mock) => (
+                    mockList.map((mock) => (
                         <MockCard key={mock.id} mock={mock} onStart={onStart} />
                     ))
                 )}

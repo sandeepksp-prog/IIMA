@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Play, Check, ChevronRight, Lock, BookOpen, Clock, Activity } from 'lucide-react';
 
-export default function SectionalMocks({ onStart }) {
-    const [activeSubject, setActiveSubject] = useState('VARC'); // VARC | DILR | QA
+export default function SectionalMocks({ onStart, initialSubject }) {
+    const [activeSubject, setActiveSubject] = useState(initialSubject || 'VARC'); // VARC | DILR | QA
 
     // --- TRUE SECTIONAL DATA GENERATOR ---
     // 10 Mocks per section
