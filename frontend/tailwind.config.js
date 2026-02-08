@@ -21,6 +21,15 @@ export default {
             boxShadow: {
                 'neo': '4px 4px 0px 0px rgba(0,0,0,1)',
                 'neo-sm': '2px 2px 0px 0px rgba(0,0,0,1)',
+            },
+            keyframes: {
+                shimmer: {
+                    '0%': { transform: 'translateX(-100%)' },
+                    '100%': { transform: 'translateX(100%)' },
+                }
+            },
+            animation: {
+                shimmer: 'shimmer 2s linear infinite',
             }
         },
     },

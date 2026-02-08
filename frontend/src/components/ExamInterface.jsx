@@ -30,8 +30,11 @@ const FALLBACK_QUESTIONS = Array.from({ length: 15 }, (_, i) => ({
 }));
 
 // Fetch Questions or Generate from Exam Data
+import SandboxLoader from './SandboxLoader';
+
 export default function ExamInterface({ examData, onExit }) {
     // --- State ---
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -149,16 +152,59 @@ export default function ExamInterface({ examData, onExit }) {
         if (loading || questions.length === 0) return;
         const autoSave = setInterval(() => {
             const stateToSave = {
-                questions, // Saving questions in case they were dynamically generated so they don't change on reload
+                questions,
                 responses,
                 qStatus,
                 currentQIndex,
                 timeLeft
             };
             localStorage.setItem(EXAM_KEY, JSON.stringify(stateToSave));
+
+            // GLOBAL LAST ACTIVE STATE (For War Room Dashboard)
+            // STRICT REQUIREMENT: Only for "Practice Tests" (not Full Mocks, Daily Targets, etc.)
+            const isPracticeMode =
+                (examData?.title && examData.title.startsWith('Practice:')) || // From PracticeTests.jsx
+                (examData?.mode === 'repository-test'); // From Mission Repository
+
+            if (isPracticeMode) {
+                const visitedCount = qStatus.filter(s => s !== STATUS.NOT_VISITED).length;
+                const answeredCount = qStatus.filter(s => s === STATUS.ANSWERED || s === STATUS.MARKED_ANSWERED).length;
+                const completionPercentage = Math.round((answeredCount / questions.length) * 100);
+
+                // Extract precise Topic/Subtopic
+                let displayTopic = questions[0]?.section || 'General';
+                let displaySubtopic = questions[0]?.topic || 'General';
+
+                if (examData?.title && examData.title.startsWith('Practice:')) {
+                    // Title format: "Practice: [Topic Title]"
+                    displaySubtopic = examData.title.replace('Practice: ', '').trim();
+                }
+
+                // If subject is available from examData (passed from PracticeTests), use it as main Topic
+                if (examData?.subject) {
+                    displayTopic = examData.subject;
+                }
+
+                const lastActiveData = {
+                    id: examData?.id || 'unknown',
+                    title: examData?.title || 'Practice Session',
+                    topic: displayTopic,
+                    subtopic: displaySubtopic,
+                    status: 'paused',
+                    progress: completionPercentage,
+                    totalQuestions: questions.length,
+                    answered: answeredCount,
+                    timestamp: Date.now(),
+                    sessionId: EXAM_KEY // Link to resume
+                };
+                localStorage.setItem('cat_last_active_session', JSON.stringify(lastActiveData));
+            }
+
+
         }, 5000);
         return () => clearInterval(autoSave);
-    }, [questions, responses, qStatus, currentQIndex, timeLeft, loading]);
+    }, [questions, responses, qStatus, currentQIndex, timeLeft, loading, examData, EXAM_KEY]);
+
 
     // Timer Logic
     useEffect(() => {
@@ -182,8 +228,29 @@ export default function ExamInterface({ examData, onExit }) {
 
         if (discard) {
             localStorage.removeItem(EXAM_KEY); // Clear saved data on discard
-        } // Else keep it (users might want to submit later or it was accidental)
+            localStorage.removeItem('cat_last_active_session'); // Clear dashboard widget
+            onExit();
+        } else {
+            // Trigger Sandbox Animation -> Then Exit
+            setIsSubmitting(true);
 
+            // The actual data processing happens here, but we wait for animation to finish
+            // MARK AS COMPLETED (Only if it was a saved Practice Session)
+            const lastActive = localStorage.getItem('cat_last_active_session');
+            if (lastActive) {
+                const data = JSON.parse(lastActive);
+                // Ensure we are completing the SAME session that was active
+                if (data.sessionId === EXAM_KEY) {
+                    data.status = 'completed';
+                    data.progress = 100;
+                    localStorage.setItem('cat_last_active_session', JSON.stringify(data));
+                }
+            }
+        }
+    };
+
+    const handleSandboxComplete = () => {
+        setIsSubmitting(false);
         onExit();
     };
 
@@ -231,6 +298,7 @@ export default function ExamInterface({ examData, onExit }) {
 
     return (
         <div className="flex flex-col h-screen bg-zinc-950 text-zinc-50 font-sans overflow-hidden">
+            {isSubmitting && <SandboxLoader onComplete={handleSandboxComplete} />}
 
             {/* 1. HEADER (Sticky Top) */}
             <header className="h-16 bg-zinc-900 border-b-2 border-zinc-800 flex items-center justify-between px-6 shadow-md z-10">

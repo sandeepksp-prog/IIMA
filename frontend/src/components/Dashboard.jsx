@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Play, Target, AlertTriangle, BookOpen,
     TrendingUp, Activity, Calendar, Award,
@@ -33,6 +33,44 @@ const contributionData = Array.from({ length: 52 }, (_, i) => ({
 
 export default function Dashboard({ onStartMock, onOpenDailyInsights, onNavigate }) {
     const [analyticsType, setAnalyticsType] = useState('full'); // 'full' | 'sectional'
+
+    // --- LAST ACTIVE SESSION LOGIC ---
+    const [lastActive, setLastActive] = useState(null);
+
+    useEffect(() => {
+        const loadLastActive = () => {
+            try {
+                const stored = localStorage.getItem('cat_last_active_session');
+                if (stored) {
+                    setLastActive(JSON.parse(stored));
+                } else {
+                    setLastActive(null);
+                }
+            } catch (e) {
+                console.error("Failed to load last active session:", e);
+            }
+        };
+        loadLastActive();
+        // Optional: Listen for storage events to update real-time if multiple tabs
+        window.addEventListener('storage', loadLastActive);
+        return () => window.removeEventListener('storage', loadLastActive);
+    }, []);
+
+    const handleResume = () => {
+        if (!lastActive) return;
+        // Construct exam object to force resume in ExamInterface
+        const resumeExamData = {
+            id: lastActive.id,
+            title: lastActive.title, // Pass title for context
+            mode: 'resume' // Signal it's a resume (though ExamInterface checks ID primarily)
+        };
+        onStartMock(resumeExamData);
+    };
+
+    const handleNextSet = () => {
+        // Simple logic: Go to Practice Tests
+        onNavigate('practice');
+    };
 
     return (
         <div className="p-8 space-y-12 max-w-7xl mx-auto">
@@ -91,21 +129,50 @@ export default function Dashboard({ onStartMock, onOpenDailyInsights, onNavigate
                         </div>
                     </div>
 
-                    {/* Widget 3: Resume Prep */}
-                    <div className="md:col-span-1 bg-zinc-900 border-2 border-zinc-800 shadow-[5px_5px_0px_0px_#27272a] p-6 flex flex-col justify-between">
-                        <div className="bg-indigo-500/10 w-fit p-2 rounded border border-indigo-500/20">
-                            <BookOpen className="w-5 h-5 text-indigo-400" />
-                        </div>
-                        <div>
-                            <p className="text-xs text-zinc-500 mb-1 font-mono">LAST ACTIVE</p>
-                            <h4 className="text-lg font-bold text-indigo-400">Geometry: Circles</h4>
-                            <div className="w-full bg-zinc-800 h-1 mt-2">
-                                <div className="bg-indigo-500 h-1 w-2/3"></div>
+                    {/* Widget 3: Resume Prep (Last Active) */}
+                    <div className="md:col-span-1 bg-zinc-900 border-2 border-zinc-800 shadow-[5px_5px_0px_0px_#27272a] p-6 flex flex-col justify-between relative overflow-hidden">
+                        {lastActive ? (
+                            <>
+                                <div className="bg-indigo-500/10 w-fit p-2 rounded border border-indigo-500/20 mb-2">
+                                    <BookOpen className="w-5 h-5 text-indigo-400" />
+                                </div>
+                                <div className="relative z-10">
+                                    <p className="text-[10px] text-zinc-500 mb-1 font-mono uppercase tracking-widest">
+                                        LAST ACTIVE ({lastActive.status})
+                                    </p>
+                                    <h4 className="text-lg font-bold text-indigo-400 truncate pr-2" title={`${lastActive.topic}: ${lastActive.subtopic}`}>
+                                        {lastActive.topic}: <span className="text-white">{lastActive.subtopic}</span>
+                                    </h4>
+                                    <div className="w-full bg-zinc-800 h-1 mt-3 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-1 transition-all duration-500 ${lastActive.status === 'completed' ? 'bg-emerald-500 w-full' : 'bg-indigo-500'}`}
+                                            style={{ width: `${lastActive.progress}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+
+                                {lastActive.status === 'completed' ? (
+                                    <button
+                                        onClick={handleNextSet}
+                                        className="mt-4 text-[10px] font-bold text-emerald-400 hover:text-white self-end flex items-center gap-1 uppercase tracking-wide border border-emerald-500/30 px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 rounded transition-all"
+                                    >
+                                        Practice Next Set <ChevronRight className="w-3 h-3" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleResume}
+                                        className="mt-4 text-xs font-bold text-zinc-300 hover:text-white self-end flex items-center gap-1 uppercase tracking-wide hover:underline decoration-indigo-500 underline-offset-4 transition-all"
+                                    >
+                                        RESUME <ChevronRight className="w-3 h-3" />
+                                    </button>
+                                )}
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-zinc-600 space-y-2 opacity-50">
+                                <BookOpen className="w-8 h-8 mb-2" />
+                                <span className="text-xs font-mono uppercase">No Active Sessions</span>
                             </div>
-                        </div>
-                        <button className="text-xs font-bold text-zinc-300 hover:text-white self-end flex items-center gap-1">
-                            RESUME <ChevronRight className="w-3 h-3" />
-                        </button>
+                        )}
                     </div>
 
                     {/* Widget 4: Weakness Alert */}
